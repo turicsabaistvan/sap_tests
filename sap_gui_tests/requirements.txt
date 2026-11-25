@@ -1,0 +1,7 @@
+robotframework==7.5.1
+pywin32==312
+python-dotenv==1.2.4
+
+# Development tooling (lint / formatting)
+robotframework-robocop==9.4.0
+robotframework-tidy==4.18.0

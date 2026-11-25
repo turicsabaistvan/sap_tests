@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="680" viewBox="0 0 1000 680" role="img" aria-labelledby="archTitle archDesc">
+  <title id="archTitle">SAP GUI Robot Framework test architecture</title>
+  <desc id="archDesc">Layered architecture from the Robot Framework test suite through the keyword resources and the SapComLibrary COM wrapper down to SAP GUI for Windows and the SAP system.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .bg{fill:#f8fafc}
+      .card{fill:#ffffff;stroke:#cbd5e1;stroke-width:1.5}
+      .bar{fill:#2563eb}
+      .ttl{font:600 23px system-ui,-apple-system,'Segoe UI',sans-serif;fill:#0f172a}
+      .lt{font:600 17px system-ui,-apple-system,'Segoe UI',sans-serif;fill:#0f172a}
+      .sub{font:13px ui-monospace,'SFMono-Regular',Consolas,monospace;fill:#334155}
+      .muted{font:13px system-ui,-apple-system,'Segoe UI',sans-serif;fill:#64748b}
+      .arrow{stroke:#64748b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .pill{fill:#eff6ff;stroke:#bfdbfe;stroke-width:1}
+      .pilltext{font:600 12px system-ui,-apple-system,'Segoe UI',sans-serif;fill:#1d4ed8}
+      .note{font:13px system-ui,-apple-system,'Segoe UI',sans-serif;fill:#475569}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1000" height="680" rx="16"/>
+  <text class="ttl" x="48" y="52">Test architecture</text>
+  <text class="muted" x="48" y="76">Robot Framework drives SAP GUI Scripting through a direct COM wrapper.</text>
+
+  <g>
+    <rect class="card" x="120" y="100" width="760" height="70" rx="12"/>
+    <rect class="bar" x="120" y="100" width="6" height="70" rx="3"/>
+    <text class="lt" x="146" y="130">Test suite — Robot Framework</text>
+    <text class="sub" x="146" y="152">tests/01_se16n_read_master_data.robot</text>
+    <rect class="pill" x="790" y="118" width="70" height="30" rx="15"/>
+    <text class="pilltext" x="814" y="138">11 tests</text>
+  </g>
+  <line class="arrow" x1="500" y1="170" x2="500" y2="202"/>
+
+  <g>
+    <rect class="card" x="120" y="210" width="760" height="70" rx="12"/>
+    <rect class="bar" x="120" y="210" width="6" height="70" rx="3"/>
+    <text class="lt" x="146" y="240">Keyword layer — shared resources and page objects</text>
+    <text class="sub" x="146" y="262">resources/common/*.resource · resources/pages/se16n.resource</text>
+  </g>
+  <line class="arrow" x1="500" y1="280" x2="500" y2="312"/>
+
+  <g>
+    <rect class="card" x="120" y="320" width="760" height="70" rx="12"/>
+    <rect class="bar" x="120" y="320" width="6" height="70" rx="3"/>
+    <text class="lt" x="146" y="350">Python COM library</text>
+    <text class="sub" x="146" y="372">SapComLibrary.py — win32com.client · shared class-level session</text>
+  </g>
+  <line class="arrow" x1="500" y1="390" x2="500" y2="422"/>
+
+  <g>
+    <rect class="card" x="120" y="430" width="760" height="70" rx="12"/>
+    <rect class="bar" x="120" y="430" width="6" height="70" rx="3"/>
+    <text class="lt" x="146" y="460">SAP GUI for Windows</text>
+    <text class="sub" x="146" y="482">sapshcut.exe — SAP GUI Scripting API</text>
+  </g>
+  <line class="arrow" x1="500" y1="500" x2="500" y2="532"/>
+
+  <g>
+    <rect class="card" x="120" y="540" width="760" height="70" rx="12"/>
+    <rect class="bar" x="120" y="540" width="6" height="70" rx="3"/>
+    <text class="lt" x="146" y="570">SAP system</text>
+    <text class="sub" x="146" y="592">system ABA · client 800 — read-only SE16N table display</text>
+  </g>
+
+  <rect x="120" y="634" width="760" height="34" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text class="note" x="140" y="656">Configuration: variables/environment.py loads .env — no credentials are stored in the repository.</text>
+</svg>

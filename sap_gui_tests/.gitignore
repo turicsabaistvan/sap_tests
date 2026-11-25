@@ -1,0 +1,8 @@
+.env
+reports
+results
+.venv/
+__pycache__/
+.robocop_cache/
+.claude
+CLAUDE.md
