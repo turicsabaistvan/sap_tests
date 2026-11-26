@@ -10,11 +10,12 @@ pipeline {
     }
 
     parameters {
-        choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit'], description: 'Browser to run the tests with')
-        booleanParam(name: 'HEADLESS', defaultValue: true, description: 'Run browser in headless mode')
-        string(name: 'BASE_URL', defaultValue: 'https://account.hanatrial.ondemand.com/', description: 'Fiori trial URL')
-        string(name: 'ROBOT_INCLUDE', defaultValue: '', description: 'Robot --include pattern (empty = all)')
-        string(name: 'ROBOT_EXCLUDE', defaultValue: '', description: 'Robot --exclude pattern (empty = none)')
+        string(name: 'BROWSER', description: 'Browser engine: chromium, firefox or webkit (required)')
+        string(name: 'HEADLESS', description: 'Run the browser headless: true or false (required)')
+        string(name: 'BASE_URL', description: 'Fiori launchpad logon URL (required)')
+        string(name: 'FIORI_LANGUAGE', description: 'SAP language code selected on the logon page, for example EN (required)')
+        string(name: 'ROBOT_INCLUDE', description: 'Robot --include pattern (empty = all)')
+        string(name: 'ROBOT_EXCLUDE', description: 'Robot --exclude pattern (empty = none)')
     }
 
     environment {
@@ -72,13 +73,14 @@ pipeline {
                                 --workdir "${WORKSPACE}" \
                                 --env FIORI_USERNAME \
                                 --env FIORI_PASSWORD \
+                                --env BASE_URL="${BASE_URL}" \
+                                --env BROWSER="${BROWSER}" \
+                                --env HEADLESS="${HEADLESS}" \
+                                --env FIORI_LANGUAGE="${FIORI_LANGUAGE}" \
                                 "${ROBOT_IMAGE}" \
                                 robot \
                                     --outputdir "${ROBOT_OUTPUT_DIR}" \
                                     --xunit xunit.xml \
-                                    --variable BROWSER_TYPE:${BROWSER} \
-                                    --variable HEADLESS_MODE:${HEADLESS} \
-                                    --variable BASE_URL:${BASE_URL} \
                                     ${INCLUDE_ARG} \
                                     ${EXCLUDE_ARG} \
                                     robot-tests/tests/

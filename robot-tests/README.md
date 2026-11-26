@@ -23,7 +23,9 @@ rfbrowser init                            # Linux may use: rfbrowser init --with
 
 ## Configuration
 
-Robot loads the repository-root `.env` file automatically when it exists (via `resources/common/env_loader.py`). Variables set in the process environment always take precedence, which is how CI and Jenkins provide credentials. Set the variables in the shell when no `.env` file is available:
+Robot loads the repository-root `.env` file automatically when it exists (via `resources/common/env_loader.py`). Variables set in the process environment always take precedence, which is how CI and Jenkins provide configuration. All variables below are mandatory and have no fallback values: Robot aborts at suite start when one of them is undefined, and the suite setup rejects empty values, so a misconfigured run never opens a browser.
+
+Set the variables in the shell when no `.env` file is available:
 
 ```bash
 export FIORI_USERNAME="your-user"
@@ -39,10 +41,11 @@ export FIORI_LANGUAGE="EN"
 | `FIORI_USERNAME` | yes | Fiori user name (`sap-user`) |
 | `FIORI_PASSWORD` | yes | Fiori password; it is never written to the Robot log |
 | `BASE_URL` | yes | Fiori launchpad logon URL |
-| `FIORI_LANGUAGE` | no | SAP language code selected on the logon page; default `EN` |
-| `BROWSER` | no | Browser engine: `chromium`, `firefox` or `webkit`; default `chromium` |
-| `HEADLESS` | no | Run the browser headless; default `true` |
-| `BROWSER_LOCALE` | no | Browser locale used before the language is selected; default `en-US` |
+| `FIORI_LANGUAGE` | yes | SAP language code selected on the logon page (for example `EN`, `HU`, `DE`) |
+| `BROWSER` | yes | Browser engine: `chromium`, `firefox` or `webkit` |
+| `HEADLESS` | yes | Run the browser headless: `true` or `false` |
+
+The browser locale is fixed to `en-US`; the SAP language is selected explicitly on the logon page.
 
 Keep real credentials out of the repository.
 
@@ -60,6 +63,8 @@ Check that the suite parses without opening a browser:
 robot --dryrun tests/
 ```
 
+Dry-run also resolves the environment, so the mandatory variables must be available (from `.env` or the shell) for this check to succeed.
+
 Run the static analysis (Robocop 9 uses the `check` subcommand):
 
 ```bash
@@ -76,7 +81,7 @@ Robot writes its results to `results/`:
 
 ## Troubleshooting
 
-- **Missing credentials:** create the repository-root `.env` with `FIORI_USERNAME` and `FIORI_PASSWORD`, or export them before running Robot; the suite fails fast when either is missing.
+- **Missing configuration:** provide `FIORI_USERNAME`, `FIORI_PASSWORD`, `BASE_URL`, `BROWSER`, `HEADLESS` and `FIORI_LANGUAGE` in the repository-root `.env` or in the environment. The suite aborts before opening a browser and reports the missing or empty variable names.
 - **Browser executable is missing:** run `rfbrowser init` in this virtual environment.
 - **The logon page has no language drop-down:** the SAP system might not offer language selection on the logon page; the test expects the `#LANGUAGE_SELECT` control and fails if it is absent.
 - **Sign out fails:** the profile menu markup differs between SAPUI5 releases. The suite opens `#meAreaHeaderButton` (falling back to `#userActionsMenuHeaderButton`) and clicks the `Sign Out` entry by its `logoutBtn` id suffix or its text; adjust the selectors in `resources/selectors/launchpad_page_selectors.resource` if the launchpad uses another variant.

@@ -9,7 +9,7 @@ Resource         common_variables.resource
 Open Browser To Fiori Url
     [Documentation]    Opens a fresh browser context and navigates to the Fiori launchpad URL.
     [Arguments]    ${url}=${BASE_URL}
-    Validate Credentials
+    Validate Configuration
     New Browser    ${BROWSER_TYPE}    headless=${HEADLESS_MODE}
     New Context
     ...    viewport={'width': ${VIEWPORT_WIDTH}, 'height': ${VIEWPORT_HEIGHT}}
@@ -20,13 +20,9 @@ Close Browser Session
     [Documentation]    Closes every browser session opened by the suite, if any.
     Run Keyword And Ignore Error    Close Browser    ALL
 
-Validate Credentials
-    [Documentation]    Fails fast with a clear message when the Fiori credentials are missing.
-    ${username_set}=    Evaluate    bool(os.getenv('FIORI_USERNAME'))    modules=os
-    ${password_set}=    Evaluate    bool(os.getenv('FIORI_PASSWORD'))    modules=os
-    IF    not ${username_set}
-        Fail    FIORI_USERNAME environment variable is not set.
-    END
-    IF    not ${password_set}
-        Fail    FIORI_PASSWORD environment variable is not set.
+Validate Configuration
+    [Documentation]    Fails fast with a clear message when any required environment variable is missing or empty.
+    ${missing}=    Evaluate    [name for name in $REQUIRED_ENV_VARIABLES if not os.getenv(name)]    modules=os
+    IF    $missing
+        Fail    Required environment variables are missing or empty: ${missing}
     END
