@@ -13,11 +13,8 @@ import pytest
 from dotenv import load_dotenv
 from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
 
-from data import FioriTestData, load_test_data
-from pages.account_explorer_page import AccountExplorerPage
+from pages.launchpad_page import LaunchpadPage
 from pages.login_page import LoginPage
-from pages.subaccount_dialog_page import SubaccountDialogPage
-from pages.trial_page import TrialPage
 
 load_dotenv()
 
@@ -48,7 +45,7 @@ def browser() -> Iterator[Browser]:
 def context(browser: Browser) -> Iterator[BrowserContext]:
     context = browser.new_context(
         viewport={"width": 1920, "height": 1080},
-        locale="hu-HU",
+        locale=os.getenv("BROWSER_LOCALE", "en-US"),
     )
     yield context
     context.close()
@@ -90,23 +87,18 @@ def login_page(page: Page) -> LoginPage:
 
 
 @pytest.fixture(scope="function")
-def trial_page(page: Page) -> TrialPage:
-    return TrialPage(page)
-
-
-@pytest.fixture(scope="function")
-def account_explorer_page(page: Page) -> AccountExplorerPage:
-    return AccountExplorerPage(page)
-
-
-@pytest.fixture(scope="function")
-def subaccount_dialog_page(page: Page) -> SubaccountDialogPage:
-    return SubaccountDialogPage(page)
+def launchpad_page(page: Page) -> LaunchpadPage:
+    return LaunchpadPage(page)
 
 
 @pytest.fixture(scope="session")
 def base_url() -> str:
     return os.getenv("BASE_URL", "https://account.hanatrial.ondemand.com/")
+
+
+@pytest.fixture(scope="session")
+def fiori_language() -> str:
+    return os.getenv("FIORI_LANGUAGE", "EN")
 
 
 @pytest.fixture(scope="session")
@@ -120,8 +112,3 @@ def credentials() -> dict[str, str]:
             pytrace=False,
         )
     return {"username": username, "password": password}
-
-
-@pytest.fixture(scope="session")
-def test_data() -> FioriTestData:
-    return load_test_data()

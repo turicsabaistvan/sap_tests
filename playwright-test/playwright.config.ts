@@ -9,15 +9,14 @@ dotenv.config();
  */
 export default defineConfig({
   testDir: './tests',
-  // 15 minutes per test: subaccount deletion is asynchronous and can take
-  // several minutes before the tile disappears.
-  timeout: 15 * 60 * 1000,
+  // One launchpad login/logout round trip; two minutes covers slow systems.
+  timeout: 2 * 60 * 1000,
   expect: { timeout: 15_000 },
 
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: 1, // Fiori trial account has state; run serially
+  workers: 1, // A single session signs in and out of the shared SAP system
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
@@ -26,7 +25,7 @@ export default defineConfig({
 
   use: {
     baseURL: process.env.BASE_URL ?? 'https://account.hanatrial.ondemand.com/',
-    locale: 'hu-HU',
+    locale: process.env.BROWSER_LOCALE ?? 'en-US',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

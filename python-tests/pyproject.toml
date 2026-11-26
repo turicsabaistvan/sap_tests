@@ -7,6 +7,6 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.mypy]
 python_version = "3.10"
-files = ["conftest.py", "data.py", "pages", "locators", "tests"]
+files = ["conftest.py", "pages", "locators", "tests"]
 warn_unused_ignores = true
 warn_redundant_casts = true

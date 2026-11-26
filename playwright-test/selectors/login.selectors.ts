@@ -1,11 +1,12 @@
 /**
- * Selectors for the SAP IDP login page.
+ * Selectors for the SAP Fiori launchpad logon page.
  */
 export const LoginSelectors = {
-  usernameInput: 'input[placeholder="E-mail vagy felhasználónév"]',
-  passwordInput: 'input[placeholder="Jelszó"]',
-  submitButton: '#logOnFormSubmit',
-  errorMessage: 'text="Nem tudtuk hitelesíteni Önt."',
-  cookieBannerButton:
-    'div#truste-consent-buttons button#truste-consent-required',
+  loginForm: '#LOGIN_FORM',
+  languageSelect: '#LANGUAGE_SELECT',
+  languageOptions: '#LANGUAGE_SELECT option',
+  usernameInput: '#USERNAME_FIELD-inner',
+  passwordInput: '#PASSWORD_FIELD-inner',
+  submitButton: '#LOGIN_LINK',
+  errorBlock: '#LOGIN_ERROR_BLOCK',
 } as const;

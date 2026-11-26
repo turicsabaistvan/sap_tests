@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
 /**
  * Base class for all page objects.
@@ -24,14 +24,13 @@ export abstract class BasePage {
       .waitFor({ state: 'visible', timeout });
   }
 
-  protected async waitForDetached(
+  protected async waitForEnabled(
     selector: string,
-    timeout = 30_000
+    timeout = 15_000
   ): Promise<void> {
-    await this.page
-      .locator(selector)
-      .first()
-      .waitFor({ state: 'detached', timeout });
+    const locator = this.page.locator(selector).first();
+    await locator.waitFor({ state: 'visible', timeout });
+    await expect(locator).toBeEnabled({ timeout });
   }
 
   protected async click(selector: string, timeout = 15_000): Promise<void> {
@@ -50,20 +49,6 @@ export abstract class BasePage {
       .first();
     await locator.waitFor({ state: 'visible', timeout: 15_000 });
     await locator.fill(value);
-  }
-
-  /**
-   * Reads the value of the first visible match, using the same visible-first
-   * strategy as fill()/click() so duplicate UI5 clones cannot trigger
-   * strict-mode violations (mirrors the Robot suite's "Get Property value").
-   */
-  protected async getValue(selector: string, timeout = 15_000): Promise<string> {
-    const locator = this.page
-      .locator(selector)
-      .filter({ visible: true })
-      .first();
-    await locator.waitFor({ state: 'visible', timeout });
-    return locator.inputValue();
   }
 
   protected async isVisible(selector: string, timeout = 3_000): Promise<boolean> {

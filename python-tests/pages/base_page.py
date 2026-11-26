@@ -8,6 +8,7 @@ page objects stay small and readable.
 from playwright.sync_api import (
     Locator,
     Page,
+    expect,
 )
 from playwright.sync_api import (
     TimeoutError as PlaywrightTimeoutError,
@@ -16,15 +17,16 @@ from playwright.sync_api import (
 
 class BasePage:
     DEFAULT_TIMEOUT_MS = 15_000
+    LONG_TIMEOUT_MS = 30_000
 
     def __init__(self, page: Page) -> None:
         self.page = page
 
     def _locator(self, selector: str) -> Locator:
-        # UI5 often renders duplicate elements (for example several "Decline"
-        # buttons in the audit log popup, plus their destroyed clones).
-        # Restrict to visible matches and use the first one like the Robot
-        # suite does instead of failing Playwright's strict mode.
+        # UI5 often renders duplicate elements (for example several menu
+        # entries, plus their destroyed clones). Restrict to visible matches
+        # and use the first one like the Robot suite does instead of failing
+        # Playwright's strict mode.
         return self.page.locator(selector).filter(visible=True).first
 
     def wait_for_visible(
@@ -32,10 +34,10 @@ class BasePage:
     ) -> None:
         self._locator(selector).wait_for(state="visible", timeout=timeout_ms)
 
-    def wait_for_detached(
-        self, selector: str, timeout_ms: int = 30_000
+    def wait_for_enabled(
+        self, selector: str, timeout_ms: int = DEFAULT_TIMEOUT_MS
     ) -> None:
-        self._locator(selector).wait_for(state="detached", timeout=timeout_ms)
+        expect(self._locator(selector)).to_be_enabled(timeout=timeout_ms)
 
     def click(
         self, selector: str, timeout_ms: int = DEFAULT_TIMEOUT_MS

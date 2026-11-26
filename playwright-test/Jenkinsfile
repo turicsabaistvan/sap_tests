@@ -12,7 +12,7 @@ pipeline {
     parameters {
         choice(name: 'PW_PROJECT', choices: ['chromium', 'firefox', 'webkit', 'all'], description: 'Playwright project to run')
         string(name: 'PW_GREP', defaultValue: '', description: 'Playwright --grep pattern (empty = all)')
-        string(name: 'BASE_URL', defaultValue: 'https://account.hanatrial.ondemand.com/', description: 'Base URL for the E2E tests')
+        string(name: 'BASE_URL', defaultValue: 'https://account.hanatrial.ondemand.com/', description: 'Fiori launchpad logon URL')
         booleanParam(name: 'PW_DEBUG', defaultValue: false, description: 'Enable Playwright debug logs')
     }
 

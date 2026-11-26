@@ -1,14 +1,14 @@
-# pytest + Playwright Suite
+# pytest + Playwright Fiori Login/Logout Tests
 
-This suite tests the SAP Fiori trial subaccount lifecycle with pytest and Playwright for Python. It follows the Page Object Model and shares the Fiori trial account and test data with the other lifecycle implementations.
+This suite contains a single smoke test for the SAP Fiori launchpad: it opens the configured `BASE_URL`, sets the language on the logon page, signs in with the configured credentials and signs out again. It does not change any business data.
 
-> **Account safety:** The suite deletes and recreates the configured subaccount (default: `Tester`). Use a dedicated trial account and do not run this suite concurrently with the Robot, Playwright Test, Jenkins, or GitHub Actions lifecycle tests.
+It uses pytest with Playwright for Python and follows the Page Object Model.
 
 ## Requirements
 
 - Python 3.10+ (Python 3.12 recommended)
 - `venv` and `pip`
-- A Fiori trial account
+- A Fiori launchpad user with logon permissions
 
 ## Installation
 
@@ -25,22 +25,37 @@ playwright install chromium
 The suite loads a `.env` file from `python-tests/` when present. Alternatively, configure the environment variables in the shell:
 
 ```bash
-export FIORI_USERNAME="you@example.com"
+export FIORI_USERNAME="your-user"
 export FIORI_PASSWORD="secret"
-export BASE_URL="https://account.hanatrial.ondemand.com/"
+export BASE_URL="http://fiori-host:8000/sap/bc/ui5_ui5/ui2/ushell/shells/abap/FioriLaunchpad.html#Shell-home"
+export FIORI_LANGUAGE="EN"
+export BROWSER="chromium"
+export HEADLESS="true"
 ```
 
-`FIORI_USERNAME` and `FIORI_PASSWORD` are required. Shared test-data variables include `SUBACCOUNT_NAME`, `SUBACCOUNT_DESCRIPTION`, `SUBACCOUNT_REGION`, `DISPLAY_TEXT_REPEAT`, and `DESC_TEXT_REPEAT`; their defaults are listed in the [general README](../README.md#shared-fiori-configuration). Never commit `.env` or real credentials.
+| Variable | Required | Description |
+|---|---|---|
+| `FIORI_USERNAME` | yes | Fiori user name (`sap-user`) |
+| `FIORI_PASSWORD` | yes | Fiori password; it is never written to the report |
+| `BASE_URL` | yes | Fiori launchpad logon URL |
+| `FIORI_LANGUAGE` | no | SAP language code selected on the logon page; default `EN` |
+| `BROWSER` | no | Browser engine: `chromium`, `firefox` or `webkit`; default `chromium` |
+| `HEADLESS` | no | Run the browser headless; default `true` |
+| `BROWSER_LOCALE` | no | Browser locale used before the language is selected; default `en-US` |
+
+Keep real credentials out of the repository.
 
 ## Run tests
-
-Run the Fiori-marked tests:
 
 ```bash
 pytest -m fiori
 ```
 
-The suite modifies the Fiori account during a full run. Do not run it alongside another suite or workflow using the same account.
+Check that pytest collects the suite without opening a browser:
+
+```bash
+pytest --collect-only
+```
 
 ## Checks and reports
 
@@ -57,7 +72,9 @@ Jenkins and GitHub Actions also retain reports and failure artifacts; see the [r
 
 - **`browserType.launch: Executable doesn't exist`:** install Chromium from this virtual environment with `playwright install chromium`.
 - **Credentials are missing:** verify `python-tests/.env` or export `FIORI_USERNAME` and `FIORI_PASSWORD` in the shell.
+- **The logon page has no language drop-down:** the SAP system might not offer language selection on the logon page; the test expects the `#LANGUAGE_SELECT` control and fails if it is absent.
+- **Sign out fails:** the profile menu markup differs between SAPUI5 releases. The page object opens `#meAreaHeaderButton` (falling back to `#userActionsMenuHeaderButton`) and clicks the `Sign Out` entry by its `logoutBtn` id suffix or its text; adjust `locators/launchpad_selectors.py` if the launchpad uses another variant.
+- **Unexpected logon error:** the failure message contains the text of the logon page error block when the launchpad does not load.
 - **Report or artifact paths are missing:** confirm that the test run completed far enough to produce the report; screenshots and traces are generated on failure.
-- **Another run is modifying the subaccount:** wait for all other local and CI lifecycle runs to finish before retrying.
 
-For shared configuration, Docker/Jenkins, GitHub Actions, and repository-wide safety notes, see the [general README](../README.md).
+For shared configuration, Docker/Jenkins, GitHub Actions, and repository-wide notes, see the [general README](../README.md).

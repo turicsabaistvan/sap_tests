@@ -1,19 +1,19 @@
 # Fiori Test Automation
 
-This repository contains automated tests for SAP Fiori trial account workflows, a separate SAP GUI smoke-test suite, and the CI infrastructure used to run them.
+This repository contains automated SAP Fiori launchpad login/logout smoke tests in three independent frameworks, a separate SAP GUI smoke-test suite, and the CI infrastructure used to run them.
 
 ## Test suites
 
 | Suite | Framework | Location | Guide | Scope |
 |---|---|---|---|---|
 | Fiori login/logout — Robot | Robot Framework + Browser (Playwright) | `robot-tests/` | [Robot Framework guide](robot-tests/README.md) | Logs on with the configured language and signs out (read-only) |
-| Fiori lifecycle — TypeScript | Playwright Test | `playwright-test/` | [Playwright guide](playwright-test/README.md) | Creates, edits, and deletes the `Tester` subaccount |
-| Fiori lifecycle — Python | pytest + Playwright | `python-tests/` | [pytest guide](python-tests/README.md) | Creates, edits, and deletes the `Tester` subaccount |
+| Fiori login/logout — TypeScript | Playwright Test | `playwright-test/` | [Playwright guide](playwright-test/README.md) | Logs on with the configured language and signs out (read-only) |
+| Fiori login/logout — Python | pytest + Playwright | `python-tests/` | [pytest guide](python-tests/README.md) | Logs on with the configured language and signs out (read-only) |
 | SAP GUI smoke tests | Robot Framework + SAP GUI Scripting COM | `sap_gui_tests/` | [SAP GUI guide](sap_gui_tests/README.md) | Read-only SE16N table checks on Windows |
 
-The Playwright and pytest suites implement the same Fiori trial subaccount journey using independent frameworks. The Robot suite is a read-only logon smoke test that selects the logon language and signs out. `sap_gui_tests/` is a separate Windows-only suite for SAP GUI for Windows; it does not use the Fiori browser workflow.
+The Playwright and pytest suites implement the same Fiori login/logout flow as the Robot suite using independent frameworks. All three open `BASE_URL`, select the logon language, sign in with the configured credentials, and sign out; none of them change business data. `sap_gui_tests/` is a separate Windows-only suite for SAP GUI for Windows; it does not use the Fiori browser workflow.
 
-> **Important:** The Playwright and pytest lifecycle suites modify the same trial account. They delete and recreate the configured subaccount (default: `Tester`). Use a dedicated account and never run these suites in parallel across local runs, Jenkins, or GitHub Actions. The Robot suite only signs in and out, and the SAP GUI suite is read-only with respect to business data, but its setup and teardown terminate running SAP GUI processes; save any unsaved SAP work before running it.
+> **Important:** The browser suites open a session against the same SAP system, so serializing runs avoids overlapping sessions. They only sign in and out, so they do not modify the account. The SAP GUI suite is read-only with respect to business data, but its setup and teardown terminate running SAP GUI processes; save any unsaved SAP work before running it.
 
 ## Repository layout
 
@@ -22,8 +22,8 @@ The Playwright and pytest suites implement the same Fiori trial subaccount journ
 ├── .github/workflows/       # Manual GitHub Actions workflow
 ├── .githooks/               # Optional pre-commit checks
 ├── robot-tests/             # Robot Framework + Browser login/logout smoke test
-├── playwright-test/         # Playwright Test / TypeScript suite
-├── python-tests/            # pytest + Playwright suite
+├── playwright-test/         # Playwright Test / TypeScript login/logout smoke test
+├── python-tests/            # pytest + Playwright login/logout smoke test
 ├── sap_gui_tests/           # Windows SAP GUI Scripting suite
 ├── compose.yml              # Jenkins and Docker-in-Docker services
 ├── Dockerfile.jenkins       # Jenkins controller image
@@ -53,15 +53,12 @@ At minimum, configure `FIORI_USERNAME`, `FIORI_PASSWORD`, and (when running Jenk
 
 | Variable | Used by | Description |
 |---|---|---|
-| `FIORI_USERNAME` / `FIORI_PASSWORD` | Fiori suites, Jenkins, GitHub Actions | Fiori trial account credentials |
-| `BASE_URL` | Fiori suites | Fiori trial landing page; defaults to `https://account.hanatrial.ondemand.com/` |
+| `FIORI_USERNAME` / `FIORI_PASSWORD` | Fiori suites, Jenkins, GitHub Actions | Fiori launchpad credentials |
+| `BASE_URL` | Fiori suites | Fiori launchpad logon URL; defaults to `https://account.hanatrial.ondemand.com/` |
+| `FIORI_LANGUAGE` | Fiori suites | SAP language code selected on the logon page; default `EN` |
 | `BROWSER` | Robot, pytest | Browser engine (`chromium`, `firefox`, or `webkit`) |
 | `HEADLESS` | Robot, pytest | Run browser headlessly (`true` / `false`) |
-| `SUBACCOUNT_NAME` | Fiori suites | Test subaccount name; default `Tester` |
-| `SUBACCOUNT_DESCRIPTION` | Fiori suites | Test description; default `Test` |
-| `SUBACCOUNT_REGION` | Fiori suites | Region; default `US East (VA) - AWS` |
-| `DISPLAY_TEXT_REPEAT` | Fiori suites | Long-name repeat count; default `15` |
-| `DESC_TEXT_REPEAT` | Fiori suites | Long-description repeat count; default `10` |
+| `BROWSER_LOCALE` | Fiori suites | Browser locale used before the language is selected; default `en-US` |
 | `JENKINS_ADMIN_ID` | Jenkins | Local Jenkins admin username; default `admin` |
 | `JENKINS_ADMIN_PASSWORD` | Jenkins | Local Jenkins admin password; set this explicitly |
 | `JENKINS_UID` / `JENKINS_GID` | Jenkins | Container user and group IDs |
@@ -118,7 +115,7 @@ The Jenkins image contains pinned plugins from `plugins.txt`; it does not instal
 | `fiori-playwright-e2e` | `playwright-test/Jenkinsfile` | Playwright Test |
 | `fiori-python-e2e` | `python-tests/Jenkinsfile` | pytest + Playwright |
 
-The pipelines use the `dind` sidecar over TLS; the host Docker socket is not mounted. Each test stage uses the shared `fiori-trial-account` lock so only one Fiori lifecycle suite changes the trial account at a time. The lock does not coordinate with local runs or GitHub Actions, so avoid overlapping runs across environments as well.
+The pipelines use the `dind` sidecar over TLS; the host Docker socket is not mounted. Each test stage uses the shared `fiori-trial-account` lock so only one suite drives the SAP system at a time. The lock does not coordinate with local runs or GitHub Actions, so avoid overlapping runs across environments as well.
 
 Each pipeline checks out the repository, builds its runner image, and runs its suite inside that image. The Playwright pipeline repopulates its `playwright_node_modules` named volume from the freshly built image on each run. The test workspace is mounted at the same path inside the `dind` sidecar and test container so the checked-out files are available to the runner. Common pipeline parameters are exposed as environment variables, including `BROWSER`, `HEADLESS`, and `BASE_URL`; the Playwright job also accepts `PW_PROJECT` and `PW_GREP`, and pytest accepts `PYTEST_MARKERS`.
 
@@ -139,20 +136,16 @@ The suite pipelines build their runner image through the `dind` sidecar. Build l
 
 ### GitHub Actions
 
-`.github/workflows/e2e-tests.yml` is a manual `workflow_dispatch` workflow. It runs on GitHub-hosted Ubuntu runners, uses repository secrets (not `.env`), and publishes test reports. It is deliberately not triggered on every push because the Fiori lifecycle tests modify the shared trial account.
+`.github/workflows/e2e-tests.yml` is a manual `workflow_dispatch` workflow. It runs on GitHub-hosted Ubuntu runners, uses repository secrets (not `.env`), and publishes test reports. It remains manual because it needs the repository secrets and drives a shared SAP system.
 
 Required repository secrets:
 
 | Secret | Required | Description |
 |---|---|---|
-| `FIORI_USERNAME` | Yes | Fiori trial username |
-| `FIORI_PASSWORD` | Yes | Fiori trial password |
+| `FIORI_USERNAME` | Yes | Fiori launchpad username |
+| `FIORI_PASSWORD` | Yes | Fiori launchpad password |
 | `BASE_URL` | No | Defaults to `https://account.hanatrial.ondemand.com/` |
-| `SUBACCOUNT_NAME` | No | Defaults to `Tester` |
-| `SUBACCOUNT_DESCRIPTION` | No | Defaults to `Test` |
-| `SUBACCOUNT_REGION` | No | Defaults to `US East (VA) - AWS` |
-| `DISPLAY_TEXT_REPEAT` | No | Defaults to `15` |
-| `DESC_TEXT_REPEAT` | No | Defaults to `10` |
+| `FIORI_LANGUAGE` | No | Defaults to `EN` |
 
 Add secrets under **Settings → Secrets and variables → Actions → New repository secret**, or with the GitHub CLI:
 
@@ -161,7 +154,7 @@ gh secret set FIORI_USERNAME
 gh secret set FIORI_PASSWORD
 ```
 
-Optional values can be added with `gh secret set BASE_URL`, `gh secret set SUBACCOUNT_NAME`, `gh secret set SUBACCOUNT_DESCRIPTION`, `gh secret set SUBACCOUNT_REGION`, `gh secret set DISPLAY_TEXT_REPEAT`, and `gh secret set DESC_TEXT_REPEAT`. To upload values from the local `.env` in one command, use `gh secret set -f .env` from the repository root. This uploads every key in the file; the workflow uses only the keys listed above. The `.env` file remains local and ignored by Git.
+Optional values can be added with `gh secret set BASE_URL` and `gh secret set FIORI_LANGUAGE`. To upload values from the local `.env` in one command, use `gh secret set -f .env` from the repository root. This uploads every key in the file; the workflow uses only the keys listed above. The `.env` file remains local and ignored by Git.
 
 Run from the Actions tab or with GitHub CLI:
 

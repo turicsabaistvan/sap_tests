@@ -12,7 +12,8 @@ pipeline {
     parameters {
         choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit'], description: 'Browser to run the tests with')
         booleanParam(name: 'HEADLESS', defaultValue: true, description: 'Run browser in headless mode')
-        string(name: 'BASE_URL', defaultValue: 'https://account.hanatrial.ondemand.com/', description: 'Fiori trial URL')
+        string(name: 'BASE_URL', defaultValue: 'https://account.hanatrial.ondemand.com/', description: 'Fiori launchpad logon URL')
+        string(name: 'FIORI_LANGUAGE', defaultValue: 'EN', description: 'SAP language code selected on the logon page')
         string(name: 'PYTEST_MARKERS', defaultValue: 'fiori', description: 'pytest -m expression (e.g. fiori)')
         string(name: 'PYTEST_K_EXPR', defaultValue: '', description: 'pytest -k expression (empty = all)')
     }
@@ -70,6 +71,7 @@ pipeline {
                                 --env BROWSER="${BROWSER}" \
                                 --env HEADLESS="${HEADLESS}" \
                                 --env BASE_URL="${BASE_URL}" \
+                                --env FIORI_LANGUAGE="${FIORI_LANGUAGE}" \
                                 --env FIORI_USERNAME \
                                 --env FIORI_PASSWORD \
                                 "${PYTEST_IMAGE}" \
