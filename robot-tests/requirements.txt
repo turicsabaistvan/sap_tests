@@ -1,4 +1,5 @@
 robotframework==7.1.1
 robotframework-browser==21.0.0
 robotframework-robocop
+python-dotenv==1.0.1
 pytest==8.3.3

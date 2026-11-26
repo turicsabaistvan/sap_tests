@@ -12,7 +12,7 @@ Resource          ../../resources/pages/launchpad_page.resource
 
 Suite Setup       Open Browser To Fiori Url
 Suite Teardown    Close Browser Session
-Test Teardown     Run Keyword If Test Failed    Take Screenshot    fullPage=True
+Test Teardown     Run Keyword If Test Failed    Run Keyword And Ignore Error    Take Screenshot    fullPage=True
 
 
 *** Test Cases ***

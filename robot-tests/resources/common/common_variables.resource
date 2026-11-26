@@ -1,5 +1,7 @@
 *** Settings ***
 Documentation    Shared variables for the Fiori launchpad login/logout suite.
+# Loads the repository .env before the %{...} variables below are resolved.
+Library          env_loader.py
 
 
 *** Variables ***

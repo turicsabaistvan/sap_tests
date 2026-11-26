@@ -11,10 +11,15 @@ Resource         ../selectors/login_page_selectors.resource
 Wait For Fiori Launchpad
     [Documentation]    Waits for the launchpad profile button and reports a rejected login clearly.
     ${loaded}=    Run Keyword And Return Status
-    ...    Wait For Elements State    ${LAUNCHPAD_ME_AREA_BUTTON}    enabled    timeout=${LAUNCHPAD_TIMEOUT}
+    ...    Wait For Elements State    ${LAUNCHPAD_ME_AREA_BUTTON}    visible    timeout=${LAUNCHPAD_TIMEOUT}
+    IF    ${loaded}
+        ${loaded}=    Run Keyword And Return Status
+        ...    Wait For Elements State    ${LAUNCHPAD_ME_AREA_BUTTON}    enabled    timeout=${LONG_TIMEOUT}
+    END
     IF    not ${loaded}
         Report Login Error If Displayed
-        Fail    The Fiori launchpad did not load within ${LAUNCHPAD_TIMEOUT}.
+        ${url}=    Get Url
+        Fail    The Fiori launchpad did not load within ${LAUNCHPAD_TIMEOUT} (url: ${url}).
     END
 
 Report Login Error If Displayed

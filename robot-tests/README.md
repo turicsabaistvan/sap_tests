@@ -23,7 +23,7 @@ rfbrowser init                            # Linux may use: rfbrowser init --with
 
 ## Configuration
 
-Robot reads settings from the process environment:
+Robot loads the repository-root `.env` file automatically when it exists (via `resources/common/env_loader.py`). Variables set in the process environment always take precedence, which is how CI and Jenkins provide credentials. Set the variables in the shell when no `.env` file is available:
 
 ```bash
 export FIORI_USERNAME="your-user"
@@ -76,7 +76,7 @@ Robot writes its results to `results/`:
 
 ## Troubleshooting
 
-- **Missing credentials:** set `FIORI_USERNAME` and `FIORI_PASSWORD` before running Robot; the suite fails fast when either is missing.
+- **Missing credentials:** create the repository-root `.env` with `FIORI_USERNAME` and `FIORI_PASSWORD`, or export them before running Robot; the suite fails fast when either is missing.
 - **Browser executable is missing:** run `rfbrowser init` in this virtual environment.
 - **The logon page has no language drop-down:** the SAP system might not offer language selection on the logon page; the test expects the `#LANGUAGE_SELECT` control and fails if it is absent.
 - **Sign out fails:** the profile menu markup differs between SAPUI5 releases. The suite opens `#meAreaHeaderButton` (falling back to `#userActionsMenuHeaderButton`) and clicks the `Sign Out` entry by its `logoutBtn` id suffix or its text; adjust the selectors in `resources/selectors/launchpad_page_selectors.resource` if the launchpad uses another variant.

@@ -17,7 +17,7 @@ Set Login Language
     [Arguments]    ${language}=${FIORI_LANGUAGE}
     Wait For Elements State    ${LOGIN_LANGUAGE_SELECT}    visible    timeout=${LONG_TIMEOUT}
     # The drop-down is filled by the page script, so retry until the option exists.
-    Wait Until Keyword Succeeds    ${DEFAULT_TIMEOUT}    0.5s
+    Wait Until Keyword Succeeds    ${LONG_TIMEOUT}    0.5s
     ...    Select Options By    ${LOGIN_LANGUAGE_SELECT}    value    ${language}
     ${selected}=    Get Selected Options    ${LOGIN_LANGUAGE_SELECT}    value
     Should Contain    ${selected}    ${language}

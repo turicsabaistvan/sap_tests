@@ -17,8 +17,8 @@ Open Browser To Fiori Url
     New Page    ${url}
 
 Close Browser Session
-    [Documentation]    Closes every browser session opened by the suite.
-    Close Browser    ALL
+    [Documentation]    Closes every browser session opened by the suite, if any.
+    Run Keyword And Ignore Error    Close Browser    ALL
 
 Validate Credentials
     [Documentation]    Fails fast with a clear message when the Fiori credentials are missing.
