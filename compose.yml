@@ -49,6 +49,12 @@ services:
       - JENKINS_ADMIN_PASSWORD=${JENKINS_ADMIN_PASSWORD:-admin}
       - FIORI_USERNAME=${FIORI_USERNAME:-}
       - FIORI_PASSWORD=${FIORI_PASSWORD:-}
+      # Robot test settings, sourced from the host .env file. The FIORI_TEST_
+      # prefix keeps them out of reach of stale Jenkins job parameters.
+      - FIORI_TEST_BASE_URL=${BASE_URL:-}
+      - FIORI_TEST_BROWSER=${BROWSER:-}
+      - FIORI_TEST_HEADLESS=${HEADLESS:-}
+      - FIORI_TEST_LANGUAGE=${FIORI_LANGUAGE:-}
     depends_on:
       dind:
         condition: service_healthy

@@ -10,10 +10,6 @@ pipeline {
     }
 
     parameters {
-        string(name: 'BROWSER', description: 'Browser engine: chromium, firefox or webkit (required)')
-        string(name: 'HEADLESS', description: 'Run the browser headless: true or false (required)')
-        string(name: 'BASE_URL', description: 'Fiori launchpad logon URL (required)')
-        string(name: 'FIORI_LANGUAGE', description: 'SAP language code selected on the logon page, for example EN (required)')
         string(name: 'ROBOT_INCLUDE', description: 'Robot --include pattern (empty = all)')
         string(name: 'ROBOT_EXCLUDE', description: 'Robot --exclude pattern (empty = none)')
     }
@@ -73,10 +69,10 @@ pipeline {
                                 --workdir "${WORKSPACE}" \
                                 --env FIORI_USERNAME \
                                 --env FIORI_PASSWORD \
-                                --env BASE_URL="${BASE_URL}" \
-                                --env BROWSER="${BROWSER}" \
-                                --env HEADLESS="${HEADLESS}" \
-                                --env FIORI_LANGUAGE="${FIORI_LANGUAGE}" \
+                                --env BASE_URL="${FIORI_TEST_BASE_URL}" \
+                                --env BROWSER="${FIORI_TEST_BROWSER}" \
+                                --env HEADLESS="${FIORI_TEST_HEADLESS}" \
+                                --env FIORI_LANGUAGE="${FIORI_TEST_LANGUAGE}" \
                                 "${ROBOT_IMAGE}" \
                                 robot \
                                     --outputdir "${ROBOT_OUTPUT_DIR}" \

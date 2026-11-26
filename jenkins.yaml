@@ -19,7 +19,7 @@ jobs:
             scm {
               git {
                 remote {
-                  url('git@github.com:turicsabaistvan/fiori.git')
+                  url('git@github.com:turicsabaistvan/sap_tests.git')
                   credentials('git-ssh-credentials')
                 }
                 branch('*/main')
@@ -38,7 +38,7 @@ jobs:
             scm {
               git {
                 remote {
-                  url('git@github.com:turicsabaistvan/fiori.git')
+                  url('git@github.com:turicsabaistvan/sap_tests.git')
                   credentials('git-ssh-credentials')
                 }
                 branch('*/main')
@@ -57,7 +57,7 @@ jobs:
             scm {
               git {
                 remote {
-                  url('git@github.com:turicsabaistvan/fiori.git')
+                  url('git@github.com:turicsabaistvan/sap_tests.git')
                   credentials('git-ssh-credentials')
                 }
                 branch('*/main')
