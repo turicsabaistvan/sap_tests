@@ -1,6 +1,11 @@
+*** Settings ***
+Documentation    Locators for the SAP Fiori logon page.
+
+
 *** Variables ***
-${LOGIN_USERNAME_INPUT}       input[placeholder="E-mail vagy felhasználónév"]
-${LOGIN_PASSWORD_INPUT}       input[placeholder="Jelszó"]
-${LOGIN_SUBMIT_BUTTON}        id=logOnFormSubmit
-${LOGIN_ERROR_MESSAGE}        text="Nem tudtuk hitelesíteni Önt."
-${COOKIE_BANNER_BUTTON}       div#truste-consent-buttons button#truste-consent-required
+${LOGIN_FORM}               css=#LOGIN_FORM
+${LOGIN_USERNAME_INPUT}     css=#USERNAME_FIELD-inner
+${LOGIN_PASSWORD_INPUT}     css=#PASSWORD_FIELD-inner
+${LOGIN_SUBMIT_BUTTON}      css=#LOGIN_LINK
+${LOGIN_LANGUAGE_SELECT}    css=#LANGUAGE_SELECT
+${LOGIN_ERROR_BLOCK}        css=#LOGIN_ERROR_BLOCK

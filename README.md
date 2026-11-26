@@ -6,14 +6,14 @@ This repository contains automated tests for SAP Fiori trial account workflows, 
 
 | Suite | Framework | Location | Guide | Scope |
 |---|---|---|---|---|
-| Fiori lifecycle — Robot | Robot Framework + Browser (Playwright) | `robot-tests/` | [Robot Framework guide](robot-tests/README.md) | Creates, edits, and deletes the `Tester` subaccount |
+| Fiori login/logout — Robot | Robot Framework + Browser (Playwright) | `robot-tests/` | [Robot Framework guide](robot-tests/README.md) | Logs on with the configured language and signs out (read-only) |
 | Fiori lifecycle — TypeScript | Playwright Test | `playwright-test/` | [Playwright guide](playwright-test/README.md) | Creates, edits, and deletes the `Tester` subaccount |
 | Fiori lifecycle — Python | pytest + Playwright | `python-tests/` | [pytest guide](python-tests/README.md) | Creates, edits, and deletes the `Tester` subaccount |
 | SAP GUI smoke tests | Robot Framework + SAP GUI Scripting COM | `sap_gui_tests/` | [SAP GUI guide](sap_gui_tests/README.md) | Read-only SE16N table checks on Windows |
 
-The first three suites implement the same Fiori trial subaccount journey using independent frameworks. `sap_gui_tests/` is a separate Windows-only suite for SAP GUI for Windows; it does not use the Fiori browser workflow.
+The Playwright and pytest suites implement the same Fiori trial subaccount journey using independent frameworks. The Robot suite is a read-only logon smoke test that selects the logon language and signs out. `sap_gui_tests/` is a separate Windows-only suite for SAP GUI for Windows; it does not use the Fiori browser workflow.
 
-> **Important:** The three Fiori lifecycle suites modify the same trial account. They delete and recreate the configured subaccount (default: `Tester`). Use a dedicated account and never run these suites in parallel across local runs, Jenkins, or GitHub Actions. The SAP GUI suite is read-only with respect to business data, but its setup and teardown terminate running SAP GUI processes; save any unsaved SAP work before running it.
+> **Important:** The Playwright and pytest lifecycle suites modify the same trial account. They delete and recreate the configured subaccount (default: `Tester`). Use a dedicated account and never run these suites in parallel across local runs, Jenkins, or GitHub Actions. The Robot suite only signs in and out, and the SAP GUI suite is read-only with respect to business data, but its setup and teardown terminate running SAP GUI processes; save any unsaved SAP work before running it.
 
 ## Repository layout
 
@@ -21,7 +21,7 @@ The first three suites implement the same Fiori trial subaccount journey using i
 .
 ├── .github/workflows/       # Manual GitHub Actions workflow
 ├── .githooks/               # Optional pre-commit checks
-├── robot-tests/             # Robot Framework + Browser suite
+├── robot-tests/             # Robot Framework + Browser login/logout smoke test
 ├── playwright-test/         # Playwright Test / TypeScript suite
 ├── python-tests/            # pytest + Playwright suite
 ├── sap_gui_tests/           # Windows SAP GUI Scripting suite

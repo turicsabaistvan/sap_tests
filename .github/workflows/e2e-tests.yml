@@ -1,7 +1,8 @@
 name: Fiori E2E tests
 
-# Manual only: the suites delete and recreate the "Tester" subaccount in the
-# shared SAP trial account, so they must not run on every push or pull request.
+# Manual only: the Playwright and pytest suites delete and recreate the "Tester"
+# subaccount in the shared SAP trial account, so they must not run on every push or
+# pull request. The Robot suite only signs in and out.
 on:
   workflow_dispatch:
     inputs:
@@ -163,11 +164,6 @@ jobs:
       BASE_URL: ${{ secrets.BASE_URL || 'https://account.hanatrial.ondemand.com/' }}
       FIORI_USERNAME: ${{ secrets.FIORI_USERNAME }}
       FIORI_PASSWORD: ${{ secrets.FIORI_PASSWORD }}
-      SUBACCOUNT_NAME: ${{ secrets.SUBACCOUNT_NAME || 'Tester' }}
-      SUBACCOUNT_DESCRIPTION: ${{ secrets.SUBACCOUNT_DESCRIPTION || 'Test' }}
-      SUBACCOUNT_REGION: ${{ secrets.SUBACCOUNT_REGION || 'US East (VA) - AWS' }}
-      DISPLAY_TEXT_REPEAT: ${{ secrets.DISPLAY_TEXT_REPEAT || '15' }}
-      DESC_TEXT_REPEAT: ${{ secrets.DESC_TEXT_REPEAT || '10' }}
 
     steps:
       - name: Check required secrets

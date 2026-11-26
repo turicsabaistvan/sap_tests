@@ -1,16 +1,14 @@
-# Robot Framework + Browser Tests
+# Robot Framework Fiori Login/Logout Tests
 
-This suite automates the SAP Fiori trial subaccount lifecycle using Robot Framework and the Browser library (Playwright). It is a browser-based suite and is separate from the Windows SAP GUI Scripting suite in [`sap_gui_tests/`](../sap_gui_tests/README.md).
+This suite contains a single smoke test for the SAP Fiori launchpad: it opens the configured `BASE_URL`, sets the language on the logon page, signs in with the configured credentials and signs out again. It does not change any business data.
 
-The test journey includes an empty-password validation, cookie handling, conditional deletion of the configured test subaccount, subaccount creation with region selection, long-text editing, and restoration of default values.
-
-> **Account safety:** The suite deletes and recreates the configured subaccount (default: `Tester`). Use a dedicated Fiori trial account and do not run this suite at the same time as the Playwright, pytest, Jenkins, or GitHub Actions lifecycle tests.
+The suite uses Robot Framework with the Browser library (Playwright).
 
 ## Requirements
 
-- Python 3.10+ (Python 3.12 recommended)
+- Python 3.11+ (Python 3.12 recommended)
 - Node.js 22.15+ (Node.js 24 LTS recommended)
-- A Fiori trial account and access to the target landing page
+- A Fiori launchpad user with logon permissions
 
 ## Installation
 
@@ -20,34 +18,33 @@ From this directory, create a virtual environment and install the dependencies:
 python -m venv .venv
 source .venv/bin/activate                  # Windows PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-rfbrowser init                             # Linux may use: rfbrowser init --with-deps
+rfbrowser init                            # Linux may use: rfbrowser init --with-deps
 ```
-
-On Windows, install the Chromium browser with the Browser library initialization command; `--with-deps` is intended for Linux environments.
 
 ## Configuration
 
-Robot reads settings from the process environment. Configure the required credentials and, optionally, the test URL and browser:
+Robot reads settings from the process environment:
 
 ```bash
-export FIORI_USERNAME="you@example.com"
+export FIORI_USERNAME="your-user"
 export FIORI_PASSWORD="secret"
-export BASE_URL="https://account.hanatrial.ondemand.com/"
+export BASE_URL="http://fiori-host:8000/sap/bc/ui5_ui5/ui2/ushell/shells/abap/FioriLaunchpad.html#Shell-home"
 export BROWSER="chromium"
 export HEADLESS="true"
+export FIORI_LANGUAGE="EN"
 ```
 
-PowerShell:
+| Variable | Required | Description |
+|---|---|---|
+| `FIORI_USERNAME` | yes | Fiori user name (`sap-user`) |
+| `FIORI_PASSWORD` | yes | Fiori password; it is never written to the Robot log |
+| `BASE_URL` | yes | Fiori launchpad logon URL |
+| `FIORI_LANGUAGE` | no | SAP language code selected on the logon page; default `EN` |
+| `BROWSER` | no | Browser engine: `chromium`, `firefox` or `webkit`; default `chromium` |
+| `HEADLESS` | no | Run the browser headless; default `true` |
+| `BROWSER_LOCALE` | no | Browser locale used before the language is selected; default `en-US` |
 
-```powershell
-$env:FIORI_USERNAME = "you@example.com"
-$env:FIORI_PASSWORD = "secret"
-$env:BASE_URL = "https://account.hanatrial.ondemand.com/"
-$env:BROWSER = "chromium"
-$env:HEADLESS = "true"
-```
-
-The lifecycle test data can be overridden with `SUBACCOUNT_NAME`, `SUBACCOUNT_DESCRIPTION`, `SUBACCOUNT_REGION`, `DISPLAY_TEXT_REPEAT`, and `DESC_TEXT_REPEAT`. Their defaults are `Tester`, `Test`, `US East (VA) - AWS`, `15`, and `10`, respectively. Keep real credentials out of the repository.
+Keep real credentials out of the repository.
 
 ## Run the suite
 
@@ -57,29 +54,32 @@ Run from `robot-tests/`:
 robot --outputdir results tests/
 ```
 
-To check that the suite parses without opening a browser or changing the account:
+Check that the suite parses without opening a browser:
 
 ```bash
 robot --dryrun tests/
 ```
 
-The full run requires a working Fiori account and modifies its subaccount data.
+Run the static analysis (Robocop 9 uses the `check` subcommand):
+
+```bash
+robocop check resources tests
+```
 
 ## Reports
 
 Robot writes its results to `results/`:
 
 - `results/report.html` — summary report
-- `results/log.html` — detailed keyword log
+- `results/log.html` — detailed keyword log, including a screenshot when the test fails
 - `results/output.xml` — machine-readable results
-
-Jenkins and GitHub Actions also retain the suite's CI reports and failure artifacts; see the [repository CI guide](../README.md#ci-and-docker).
 
 ## Troubleshooting
 
-- **Missing Fiori credentials:** set `FIORI_USERNAME` and `FIORI_PASSWORD` in the process environment before running Robot.
-- **Browser executable is missing:** run `rfbrowser init` in this virtual environment; on Linux, initialize with required system dependencies as appropriate.
-- **Robot cannot resolve resource files:** run `robot --outputdir results tests/` from `robot-tests/` and preserve the suite's `resources/` directory.
-- **A run was interrupted during deletion:** do not start another lifecycle suite until the Fiori account has recovered; a cancelled deletion may leave the subaccount in a “Deletion in Progress” state.
+- **Missing credentials:** set `FIORI_USERNAME` and `FIORI_PASSWORD` before running Robot; the suite fails fast when either is missing.
+- **Browser executable is missing:** run `rfbrowser init` in this virtual environment.
+- **The logon page has no language drop-down:** the SAP system might not offer language selection on the logon page; the test expects the `#LANGUAGE_SELECT` control and fails if it is absent.
+- **Sign out fails:** the profile menu markup differs between SAPUI5 releases. The suite opens `#meAreaHeaderButton` (falling back to `#userActionsMenuHeaderButton`) and clicks the `Sign Out` entry by its `logoutBtn` id suffix or its text; adjust the selectors in `resources/selectors/launchpad_page_selectors.resource` if the launchpad uses another variant.
+- **Unexpected logon error:** the failure message contains the text of the logon page error block when the launchpad does not load.
 
-For shared configuration, Jenkins/GitHub Actions usage, and repository-wide safety notes, see the [general README](../README.md).
+For shared configuration and the repository CI setup, see the [general README](../README.md).
