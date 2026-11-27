@@ -8,17 +8,21 @@ and by Jenkins Credentials Store in CI).
 import os
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 import pytest
 from dotenv import load_dotenv
 from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
 
+from pages.all_my_apps_page import AllMyAppsPage
 from pages.launchpad_page import LaunchpadPage
 from pages.login_page import LoginPage
 
 load_dotenv()
 
 RESULTS_DIR = Path("test-results")
+VIDEO_DIR = RESULTS_DIR / "videos"
+VIDEO_SIZE = {"width": 1280, "height": 720}
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -43,10 +47,18 @@ def browser() -> Iterator[Browser]:
 
 @pytest.fixture(scope="function")
 def context(browser: Browser) -> Iterator[BrowserContext]:
-    context = browser.new_context(
-        viewport={"width": 1920, "height": 1080},
-        locale=os.getenv("BROWSER_LOCALE", "en-US"),
-    )
+    options: dict[str, Any] = {
+        "viewport": {"width": 1920, "height": 1080},
+        "locale": os.getenv("BROWSER_LOCALE", "en-US"),
+    }
+    # A demo recording keeps the videos of the passing run; regular runs do
+    # not record. Playwright writes one video per page into the directory.
+    if os.getenv("RECORD_VIDEO", "").lower() == "on":
+        VIDEO_DIR.mkdir(parents=True, exist_ok=True)
+        options["record_video_dir"] = str(VIDEO_DIR)
+        options["record_video_size"] = VIDEO_SIZE
+
+    context = browser.new_context(**options)
     yield context
     context.close()
 
@@ -89,6 +101,11 @@ def login_page(page: Page) -> LoginPage:
 @pytest.fixture(scope="function")
 def launchpad_page(page: Page) -> LaunchpadPage:
     return LaunchpadPage(page)
+
+
+@pytest.fixture(scope="function")
+def all_my_apps_page(page: Page) -> AllMyAppsPage:
+    return AllMyAppsPage(page)
 
 
 @pytest.fixture(scope="session")

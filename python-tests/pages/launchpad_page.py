@@ -67,3 +67,34 @@ class LaunchpadPage(BasePage):
             LaunchpadSelectors.SIGN_OUT_CONFIRM_BUTTON, 5_000
         ):
             self.click(LaunchpadSelectors.SIGN_OUT_CONFIRM_BUTTON)
+
+    def assert_home_page_is_intact(
+        self, expected_client: str, base_url: str
+    ) -> None:
+        """Asserts the home page is loaded on the expected client."""
+        self.wait_for_visible(
+            LaunchpadSelectors.DASHBOARD_GROUPS, self.LAUNCHPAD_TIMEOUT_MS
+        )
+        self.assert_no_visible_elements(
+            LaunchpadSelectors.MESSAGE_BOX,
+            "The launchpad home page shows an error dialog.",
+        )
+        # SAP stores the client in the session after logon, so the loaded URL
+        # no longer carries it.
+        if f"sap-client={expected_client}" not in base_url:
+            raise AssertionError(
+                "The configured BASE_URL does not target client "
+                f"{expected_client}."
+            )
+        current_url = self.page.url
+        base_path = base_url.split("#")[0].split("?")[0]
+        current_path = current_url.split("#")[0].split("?")[0]
+        if current_path != base_path:
+            raise AssertionError(
+                "The launchpad navigated away from the configured URL "
+                f"(current url: {current_url})."
+            )
+        if "#Shell-home" not in current_url:
+            raise AssertionError(
+                "The launchpad did not return to the home page."
+            )

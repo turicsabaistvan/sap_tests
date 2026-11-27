@@ -44,7 +44,7 @@ class BasePage:
     ) -> None:
         locator = self._locator(selector)
         locator.wait_for(state="visible", timeout=timeout_ms)
-        locator.click()
+        locator.click(timeout=timeout_ms)
 
     def fill(self, selector: str, value: str) -> None:
         locator = self._locator(selector)
@@ -59,3 +59,13 @@ class BasePage:
             return True
         except PlaywrightTimeoutError:
             return False
+
+    def bring_to_front(self) -> None:
+        # Reactivates a background tab, for example the launchpad after an app
+        # tab opened on top of it was closed.
+        self.page.bring_to_front()
+
+    def assert_no_visible_elements(
+        self, selector: str, message: str
+    ) -> None:
+        expect(self.page.locator(selector), message).to_have_count(0)

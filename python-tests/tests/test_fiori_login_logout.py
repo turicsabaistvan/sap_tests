@@ -9,6 +9,7 @@ import pytest
 
 from pages.launchpad_page import LaunchpadPage
 from pages.login_page import LoginPage
+from pages.session import login_with_configured_user, logout_from_fiori
 
 
 @pytest.mark.fiori
@@ -20,12 +21,11 @@ def test_login_with_configured_language_and_logout(
     fiori_language: str,
     credentials: dict[str, str],
 ) -> None:
-    login_page.open(base_url)
-    login_page.assert_logon_page_is_displayed()
-    login_page.set_language(fiori_language)
-    login_page.fill_username(credentials["username"])
-    login_page.fill_password(credentials["password"])
-    login_page.submit_login()
-    launchpad_page.wait_for_launchpad()
-    launchpad_page.logout()
-    login_page.assert_logon_page_is_displayed()
+    login_with_configured_user(
+        login_page,
+        launchpad_page,
+        base_url,
+        fiori_language,
+        credentials,
+    )
+    logout_from_fiori(launchpad_page, login_page)
