@@ -39,7 +39,7 @@ export abstract class BasePage {
       .filter({ visible: true })
       .first();
     await locator.waitFor({ state: 'visible', timeout });
-    await locator.click();
+    await locator.click({ timeout });
   }
 
   protected async fill(selector: string, value: string): Promise<void> {
@@ -49,6 +49,25 @@ export abstract class BasePage {
       .first();
     await locator.waitFor({ state: 'visible', timeout: 15_000 });
     await locator.fill(value);
+  }
+
+  /**
+   * Asserts that no element of the selector is visible, for example that the
+   * launchpad did not show an error dialog.
+   */
+  protected async assertNoVisibleElements(
+    selector: string,
+    message: string
+  ): Promise<void> {
+    await expect(this.page.locator(selector), message).toHaveCount(0);
+  }
+
+  /**
+   * Activates this page's tab. Used after an app tab is closed so that
+   * assertions continue on the launchpad page.
+   */
+  async bringToFront(): Promise<void> {
+    await this.page.bringToFront();
   }
 
   protected async isVisible(selector: string, timeout = 3_000): Promise<boolean> {

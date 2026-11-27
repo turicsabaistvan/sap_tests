@@ -1,19 +1,19 @@
 # Fiori Test Automation
 
-This repository contains automated SAP Fiori launchpad login/logout smoke tests in three independent frameworks, a separate SAP GUI smoke-test suite, and the CI infrastructure used to run them.
+This repository contains automated SAP Fiori launchpad tests in three independent frameworks, a separate SAP GUI smoke-test suite, and the CI infrastructure used to run them.
 
 ## Test suites
 
 | Suite | Framework | Location | Guide | Scope |
 |---|---|---|---|---|
-| Fiori login/logout — Robot | Robot Framework + Browser (Playwright) | `robot-tests/` | [Robot Framework guide](robot-tests/README.md) | Logs on with the configured language and signs out (read-only) |
-| Fiori login/logout — TypeScript | Playwright Test | `playwright-test/` | [Playwright guide](playwright-test/README.md) | Logs on with the configured language and signs out (read-only) |
-| Fiori login/logout — Python | pytest + Playwright | `python-tests/` | [pytest guide](python-tests/README.md) | Logs on with the configured language and signs out (read-only) |
+| Fiori — Robot | Robot Framework + Browser (Playwright) | `robot-tests/` | [Robot Framework guide](robot-tests/README.md) | Login/logout smoke test and a read-only User Maintenance app journey |
+| Fiori — TypeScript | Playwright Test | `playwright-test/` | [Playwright guide](playwright-test/README.md) | Login/logout smoke test and a read-only User Maintenance app journey |
+| Fiori — Python | pytest + Playwright | `python-tests/` | [pytest guide](python-tests/README.md) | Logs on with the configured language and signs out (read-only) |
 | SAP GUI smoke tests | Robot Framework + SAP GUI Scripting COM | `sap_gui_tests/` | [SAP GUI guide](sap_gui_tests/README.md) | Read-only SE16N table checks on Windows |
 
-The Playwright and pytest suites implement the same Fiori login/logout flow as the Robot suite using independent frameworks. All three open `BASE_URL`, select the logon language, sign in with the configured credentials, and sign out; none of them change business data. `sap_gui_tests/` is a separate Windows-only suite for SAP GUI for Windows; it does not use the Fiori browser workflow.
+The Robot and Playwright suites implement the same Fiori flows with independent frameworks: a login/logout smoke test and an app journey that opens the `Z_TEST_CAT` catalog's User Maintenance app from All My Apps in a new tab, searches in its user name input help, closes the tab and signs out. The pytest suite implements only the login/logout flow. All of them open `BASE_URL`, select the logon language, sign in with the configured credentials, and sign out; none of them change business data. `sap_gui_tests/` is a separate Windows-only suite for SAP GUI for Windows; it does not use the Fiori browser workflow.
 
-> **Important:** The browser suites open a session against the same SAP system, so serializing runs avoids overlapping sessions. They only sign in and out, so they do not modify the account. The SAP GUI suite is read-only with respect to business data, but its setup and teardown terminate running SAP GUI processes; save any unsaved SAP work before running it.
+> **Important:** The browser suites open a session against the same SAP system, so serializing runs avoids overlapping sessions. They only sign in, browse and sign out, so they do not modify the account. The SAP GUI suite is read-only with respect to business data, but its setup and teardown terminate running SAP GUI processes; save any unsaved SAP work before running it.
 
 ## Repository layout
 
@@ -21,8 +21,8 @@ The Playwright and pytest suites implement the same Fiori login/logout flow as t
 .
 ├── .github/workflows/       # Manual GitHub Actions workflow
 ├── .githooks/               # Optional pre-commit checks
-├── robot-tests/             # Robot Framework + Browser login/logout smoke test
-├── playwright-test/         # Playwright Test / TypeScript login/logout smoke test
+├── robot-tests/             # Robot Framework + Browser Fiori login/logout and app journey tests
+├── playwright-test/         # Playwright Test / TypeScript Fiori login/logout and app journey tests
 ├── python-tests/            # pytest + Playwright login/logout smoke test
 ├── sap_gui_tests/           # Windows SAP GUI Scripting suite
 ├── compose.yml              # Jenkins and Docker-in-Docker services

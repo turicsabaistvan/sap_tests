@@ -1,5 +1,6 @@
 import { test as base } from '@playwright/test';
 
+import { AllMyAppsPage } from '@pages/all-my-apps.page';
 import { LaunchpadPage } from '@pages/launchpad.page';
 import { LoginPage } from '@pages/login.page';
 
@@ -10,6 +11,7 @@ import { LoginPage } from '@pages/login.page';
 type FioriFixtures = {
   loginPage: LoginPage;
   launchpadPage: LaunchpadPage;
+  allMyAppsPage: AllMyAppsPage;
 };
 
 export const test = base.extend<FioriFixtures>({
@@ -18,6 +20,9 @@ export const test = base.extend<FioriFixtures>({
   },
   launchpadPage: async ({ page }, use) => {
     await use(new LaunchpadPage(page));
+  },
+  allMyAppsPage: async ({ page }, use) => {
+    await use(new AllMyAppsPage(page));
   },
 });
 

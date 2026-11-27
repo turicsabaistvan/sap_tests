@@ -8,4 +8,6 @@ export const LaunchpadSelectors = {
   signOutItem: '[id$="logoutBtn"]',
   signOutItemText: 'text="Sign Out"',
   signOutConfirmButton: '#__mbox-btn-0',
+  dashboardGroups: ':is(#dashboardGroups, .sapUshellDashboardGroupsContainer)',
+  messageBox: '.sapMMessageBox:visible',
 } as const;

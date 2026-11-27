@@ -4,6 +4,8 @@
  * Credentials must be provided via FIORI_USERNAME / FIORI_PASSWORD.
  */
 
+export const DEFAULT_BASE_URL = 'https://account.hanatrial.ondemand.com/';
+
 export function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) {

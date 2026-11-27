@@ -1,6 +1,7 @@
 import { test } from '@fixtures/fiori.fixture';
 
-import { optionalEnv, requireEnv } from '../utils/env';
+import { DEFAULT_BASE_URL } from '../utils/env';
+import { loginWithConfiguredUser, logoutFromFiori } from '../utils/session';
 
 /**
  * Smoke test for the SAP Fiori launchpad logon flow.
@@ -15,20 +16,11 @@ test.describe('Fiori Login Logout', () => {
     loginPage,
     launchpadPage,
   }) => {
-    const username = requireEnv('FIORI_USERNAME');
-    const password = requireEnv('FIORI_PASSWORD');
-    const language = optionalEnv('FIORI_LANGUAGE', 'EN');
-
-    await loginPage.open(
-      baseURL ?? 'https://account.hanatrial.ondemand.com/'
+    await loginWithConfiguredUser(
+      loginPage,
+      launchpadPage,
+      baseURL ?? DEFAULT_BASE_URL
     );
-    await loginPage.assertLogonPageIsDisplayed();
-    await loginPage.setLanguage(language);
-    await loginPage.fillUsername(username);
-    await loginPage.fillPassword(password);
-    await loginPage.submitLogin();
-    await launchpadPage.waitForLaunchpad();
-    await launchpadPage.logout();
-    await loginPage.assertLogonPageIsDisplayed();
+    await logoutFromFiori(launchpadPage, loginPage);
   });
 });
