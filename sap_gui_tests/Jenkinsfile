@@ -1,12 +1,14 @@
 pipeline {
     agent any
     stages {
-        stage('Git Pull') {
+        stage('Git Pull on VM') {
             steps {
-                sh '''
-                git fetch --all
-                git pull --ff-only
-                '''
+                withCredentials([sshUserPrivateKey(credentialsId: 'win10-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'WIN_USER')]) {
+                    sh '''
+                        chmod 600 "$SSH_KEY"
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@${VM_IP}" "cd /d \\"${VM_REPO}\\" && git fetch --all && git pull --ff-only"
+                    '''
+                }
             }
         }
         stage('Run SAP GUI Robot Test') {
@@ -14,7 +16,7 @@ pipeline {
                 withCredentials([sshUserPrivateKey(credentialsId: 'win10-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'WIN_USER')]) {
                     sh '''
                         chmod 600 "$SSH_KEY"
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@192.168.122.171" "cd C:/Users/Administrator/Documents/sap_tests && robot --outputdir results tests"
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@${VM_IP}" "cd /d \\"${VM_REPO}\\" && robot --outputdir results tests"
                     '''
                 }
             }
@@ -25,7 +27,7 @@ pipeline {
                     sh '''
                         chmod 600 "$SSH_KEY"
                         mkdir -p robot-results
-                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@192.168.122.171:C:/Users/Administrator/Documents/sap_tests/results/*.html" "${WIN_USER}@192.168.122.171:C:/Users/Administrator/Documents/sap_gui_tests/results/output.xml" ./robot-results/
+                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@${VM_IP}:${VM_REPO}/results/*.html" "${WIN_USER}@${VM_IP}:${VM_REPO}/results/output.xml" ./robot-results/
                         ls -la ./robot-results
                     '''
                 }
