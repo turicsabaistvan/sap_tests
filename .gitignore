@@ -34,3 +34,9 @@ python-tests/test-results/
 .vscode/
 .claude/
 CLAUDE.md
+
+
+.terraform/
+*.tfstate
+*.tfstate.*
+infra/.terraform.lock.hcl
