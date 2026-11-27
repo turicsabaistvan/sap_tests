@@ -16,7 +16,7 @@ pipeline {
                 withCredentials([sshUserPrivateKey(credentialsId: 'win10-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'WIN_USER')]) {
                     sh '''
                         chmod 600 "$SSH_KEY"
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@${VM_IP}" "cd /d \\"${VM_REPO}\\" && robot --outputdir results tests"
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@${VM_IP}" "cd /d \\"${VM_REPO}\\" && robot --outputdir sap_gui_tests/results sap_gui_tests/tests"
                     '''
                 }
             }
@@ -27,7 +27,7 @@ pipeline {
                     sh '''
                         chmod 600 "$SSH_KEY"
                         mkdir -p robot-results
-                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@${VM_IP}:${VM_REPO}/results/*.html" "${WIN_USER}@${VM_IP}:${VM_REPO}/results/output.xml" ./robot-results/
+                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@${VM_IP}:${VM_REPO}/sap_gui_tests/results/*.html" "${WIN_USER}@${VM_IP}:${VM_REPO}//results/sap_gui_tests/output.xml" ./robot-results/
                         ls -la ./robot-results
                     '''
                 }
