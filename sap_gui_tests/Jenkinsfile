@@ -1,12 +1,21 @@
 pipeline {
     agent any
     stages {
+        stages {
+        stage('Git Pull') {
+            steps {
+                sh '''
+                git fetch --all
+                git pull --ff-only
+                '''
+            }
+        }
         stage('Run SAP GUI Robot Test') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'win10-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'WIN_USER')]) {
                     sh '''
                         chmod 600 "$SSH_KEY"
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@192.168.122.171" "cd C:/Users/Administrator/Documents/sap_gui_tests && robot --outputdir results tests"
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@192.168.122.171" "cd C:/Users/Administrator/Documents/sap_tests && robot --outputdir results tests"
                     '''
                 }
             }
@@ -17,7 +26,7 @@ pipeline {
                     sh '''
                         chmod 600 "$SSH_KEY"
                         mkdir -p robot-results
-                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@192.168.122.171:C:/Users/Administrator/Documents/sap_gui_tests/results/*.html" "${WIN_USER}@192.168.122.171:C:/Users/Administrator/Documents/sap_gui_tests/results/output.xml" ./robot-results/
+                        scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "${WIN_USER}@192.168.122.171:C:/Users/Administrator/Documents/sap_tests/results/*.html" "${WIN_USER}@192.168.122.171:C:/Users/Administrator/Documents/sap_gui_tests/results/output.xml" ./robot-results/
                         ls -la ./robot-results
                     '''
                 }
