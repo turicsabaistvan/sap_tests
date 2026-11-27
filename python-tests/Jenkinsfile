@@ -10,10 +10,6 @@ pipeline {
     }
 
     parameters {
-        choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit'], description: 'Browser to run the tests with')
-        booleanParam(name: 'HEADLESS', defaultValue: true, description: 'Run browser in headless mode')
-        string(name: 'BASE_URL', defaultValue: 'https://account.hanatrial.ondemand.com/', description: 'Fiori launchpad logon URL')
-        string(name: 'FIORI_LANGUAGE', defaultValue: 'EN', description: 'SAP language code selected on the logon page')
         string(name: 'PYTEST_MARKERS', defaultValue: 'fiori', description: 'pytest -m expression (e.g. fiori)')
         string(name: 'PYTEST_K_EXPR', defaultValue: '', description: 'pytest -k expression (empty = all)')
     }
@@ -55,6 +51,15 @@ pipeline {
                         passwordVariable: 'FIORI_PASSWORD'
                     )]) {
                         sh '''
+                            if [ -z "${FIORI_TEST_BASE_URL}" ] \
+                                || [ -z "${FIORI_TEST_BROWSER}" ] \
+                                || [ -z "${FIORI_TEST_HEADLESS}" ] \
+                                || [ -z "${FIORI_TEST_LANGUAGE}" ]; then
+                                echo "ERROR: BASE_URL, BROWSER, HEADLESS and FIORI_LANGUAGE"
+                                echo "must be set in the host .env file."
+                                exit 1
+                            fi
+
                             K_ARG=""
                             if [ -n "${PYTEST_K_EXPR}" ]; then
                                 K_ARG="-k ${PYTEST_K_EXPR}"
@@ -64,14 +69,16 @@ pipeline {
 
                             # Runs inside the python-tests-local container, in the
                             # checked-out workspace mounted from the Jenkins home.
+                            # Test settings come from the host .env through the
+                            # FIORI_TEST_* variables, never from stale job parameters.
                             docker run --rm \
                                 --shm-size=2g \
                                 --volume "${WORKSPACE}/python-tests:/tests" \
                                 --workdir /tests \
-                                --env BROWSER="${BROWSER}" \
-                                --env HEADLESS="${HEADLESS}" \
-                                --env BASE_URL="${BASE_URL}" \
-                                --env FIORI_LANGUAGE="${FIORI_LANGUAGE}" \
+                                --env BASE_URL="${FIORI_TEST_BASE_URL}" \
+                                --env BROWSER="${FIORI_TEST_BROWSER}" \
+                                --env HEADLESS="${FIORI_TEST_HEADLESS}" \
+                                --env FIORI_LANGUAGE="${FIORI_TEST_LANGUAGE}" \
                                 --env FIORI_USERNAME \
                                 --env FIORI_PASSWORD \
                                 "${PYTEST_IMAGE}" \
@@ -89,6 +96,9 @@ pipeline {
 
     post {
         always {
+            junit testResults: "${PYTEST_RESULTS_DIR}/**/*.xml",
+                  allowEmptyResults: true
+
             publishHTML(target: [
                 allowMissing         : true,
                 alwaysLinkToLastBuild: true,
@@ -97,9 +107,6 @@ pipeline {
                 reportFiles          : 'report.html',
                 reportName           : 'pytest HTML Report'
             ])
-
-            junit testResults: "${PYTEST_RESULTS_DIR}/**/*.xml",
-                  allowEmptyResults: true
 
             archiveArtifacts artifacts: "${PYTEST_REPORT_DIR}/**/*, ${PYTEST_RESULTS_DIR}/**/*",
                              allowEmptyArchive: true

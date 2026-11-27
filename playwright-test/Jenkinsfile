@@ -12,7 +12,6 @@ pipeline {
     parameters {
         choice(name: 'PW_PROJECT', choices: ['chromium', 'firefox', 'webkit', 'all'], description: 'Playwright project to run')
         string(name: 'PW_GREP', defaultValue: '', description: 'Playwright --grep pattern (empty = all)')
-        string(name: 'BASE_URL', defaultValue: 'https://account.hanatrial.ondemand.com/', description: 'Fiori launchpad logon URL')
         booleanParam(name: 'PW_DEBUG', defaultValue: false, description: 'Enable Playwright debug logs')
     }
 
@@ -76,6 +75,13 @@ pipeline {
                         passwordVariable: 'FIORI_PASSWORD'
                     )]) {
                         sh '''
+                            if [ -z "${FIORI_TEST_BASE_URL}" ] \
+                                || [ -z "${FIORI_TEST_LANGUAGE}" ]; then
+                                echo "ERROR: BASE_URL and FIORI_LANGUAGE"
+                                echo "must be set in the host .env file."
+                                exit 1
+                            fi
+
                             GREP_ARG=""
                             if [ -n "${PW_GREP}" ]; then
                                 GREP_ARG="--grep ${PW_GREP}"
@@ -96,13 +102,16 @@ pipeline {
 
                             # Runs inside the playwright-local container, in the
                             # checked-out workspace mounted from the Jenkins home.
+                            # Test settings come from the host .env through the
+                            # FIORI_TEST_* variables, never from stale job parameters.
                             docker run --rm \
                                 --shm-size=2g \
                                 --volume "${WORKSPACE}/playwright-test:/playwright-test" \
                                 --volume "${PW_NODE_MODULES_VOLUME}:/playwright-test/node_modules" \
                                 --workdir /playwright-test \
                                 --env CI=true \
-                                --env BASE_URL="${BASE_URL}" \
+                                --env BASE_URL="${FIORI_TEST_BASE_URL}" \
+                                --env FIORI_LANGUAGE="${FIORI_TEST_LANGUAGE}" \
                                 --env FIORI_USERNAME \
                                 --env FIORI_PASSWORD \
                                 ${DEBUG_ARG} \
@@ -119,6 +128,9 @@ pipeline {
 
     post {
         always {
+            junit testResults: "${PW_RESULTS_DIR}/**/*.xml",
+                  allowEmptyResults: true
+
             publishHTML(target: [
                 allowMissing         : true,
                 alwaysLinkToLastBuild: true,
@@ -127,9 +139,6 @@ pipeline {
                 reportFiles          : 'index.html',
                 reportName           : 'Playwright HTML Report'
             ])
-
-            junit testResults: "${PW_RESULTS_DIR}/**/*.xml",
-                  allowEmptyResults: true
 
             archiveArtifacts artifacts: "${PW_RESULTS_DIR}/**/*, ${PW_OUTPUT_DIR}/**/*",
                              allowEmptyArchive: true
