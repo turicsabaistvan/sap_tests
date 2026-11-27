@@ -21,11 +21,18 @@ Fill User Name
     Fill Text    ${USER_MAINTENANCE_USER_NAME_INPUT}    ${user_name}
 
 Open User Name Input Help
-    [Documentation]    Opens the input help of the user name field and searches for the value.
+    [Documentation]    Opens the input help of the user name field, presses Find and asserts that the
+    ...    search returns at least one user.
     Click    ${USER_MAINTENANCE_INPUT_HELP_BUTTON}
     Wait For Elements State    ${USER_MAINTENANCE_INPUT_HELP_DIALOG}    visible    timeout=${LAUNCHPAD_TIMEOUT}
     Wait For Elements State    ${USER_MAINTENANCE_INPUT_HELP_FIND}    visible    timeout=${LAUNCHPAD_TIMEOUT}
     Click    ${USER_MAINTENANCE_INPUT_HELP_FIND}
+    # The result grid only renders when the search returns hits; its row header cells are scrolled
+    # out of the visible area, so the row count is checked instead of their visibility.
+    Wait For Elements State    ${USER_MAINTENANCE_INPUT_HELP_RESULTS}    visible    timeout=${LONG_TIMEOUT}
+    ${result_count}=    Get Element Count    ${USER_MAINTENANCE_INPUT_HELP_RESULT_ROWS}
+    Should Not Be Equal As Integers    ${result_count}    0
+    ...    The user name input help returned no users for the configured user name.
 
 Close Input Help
     [Documentation]    Closes the input help dialog with Cancel and waits until it is gone.

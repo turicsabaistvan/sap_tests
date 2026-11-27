@@ -11,3 +11,6 @@ ${USER_MAINTENANCE_INPUT_HELP_BUTTON}     css=#ls-inputfieldhelpbutton
 ${USER_MAINTENANCE_INPUT_HELP_DIALOG}     css=#SearchHelp1
 ${USER_MAINTENANCE_INPUT_HELP_FIND}       css=[title="Find"]:visible
 ${USER_MAINTENANCE_INPUT_HELP_CANCEL}     css=[title="Cancel"]:visible
+# One cell per hit in the search help result grid.
+${USER_MAINTENANCE_INPUT_HELP_RESULTS}    css=#SHresultgrid1
+${USER_MAINTENANCE_INPUT_HELP_RESULT_ROWS}    css=#SHresultgrid1-mrss-cont-left td[id^="sh["]

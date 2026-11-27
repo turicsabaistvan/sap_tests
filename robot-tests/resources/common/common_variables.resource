@@ -29,3 +29,6 @@ ${LAUNCHPAD_TIMEOUT}    60s
 
 # The password is never stored in a variable; login reads %FIORI_PASSWORD directly.
 ${USERNAME}             %{FIORI_USERNAME}
+
+# Optional: when ROBOT_VIDEO_DIR is set, the Browser library records one video per page there.
+${VIDEO_RECORDING_DIR}    %{ROBOT_VIDEO_DIR=}

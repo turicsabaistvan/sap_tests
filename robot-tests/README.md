@@ -3,7 +3,7 @@
 This suite contains two Fiori launchpad tests:
 
 - `fiori_login_logout.robot` opens the configured `BASE_URL`, sets the language on the logon page, signs in with the configured credentials and signs out again.
-- `fiori_user_maintenance_app.robot` opens the User Maintenance app from the launchpad All My Apps view in a new tab, checks the user name input help, then closes the tab again.
+- `fiori_user_maintenance_app.robot` opens the User Maintenance app from the launchpad All My Apps view in a new tab, searches in the user name input help, then closes the tab, returns to the launchpad and signs out.
 
 Login is a precondition in both suites. Neither test changes business data: the app test only searches in an input help and cancels the dialogs.
 
@@ -72,7 +72,19 @@ Dry-run also resolves the environment, so the mandatory variables must be availa
 
 ## App launch suite
 
-`tests/fiori/fiori_user_maintenance_app.robot` has one test: it opens the launchpad home page, opens the **Home - Show All My Apps** view, selects the `Z_TEST_CAT` catalog, starts the **User Maintenance** app in a new tab, fills the *User Name in User Master* field with the configured Fiori user, searches in the field's input help and cancels the dialogs, then closes the tab and verifies that the launchpad home page is back on the configured client without an error dialog or redirect.
+`tests/fiori/fiori_user_maintenance_app.robot` has one test that runs the whole journey and ends
+with a sign out:
+
+1. Assert the launchpad home page on the configured client (`800`) without an error dialog.
+2. Open **Home - Show All My Apps** in the launchpad header and select the `Z_TEST_CAT` catalog.
+3. Start the **User Maintenance** app, which opens in a new tab, and assert its initial screen.
+4. Fill the *User Name in User Master* field with the configured Fiori user (`FIORI_USERNAME`),
+   open the field's input help, press **Find** and check that the search returns users.
+5. Cancel the input help, close the app tab and assert that the launchpad home page is back on
+   the configured client without an error dialog or redirect.
+6. Sign out from the launchpad profile menu and wait for the logon page.
+
+The test changes no business data: it only searches in an input help and cancels the dialogs.
 
 | Variable | Default | Description |
 |---|---|---|
@@ -97,6 +109,30 @@ Robot writes its results to `results/`:
 - `results/report.html` — summary report
 - `results/log.html` — detailed keyword log, including a screenshot when the test fails
 - `results/output.xml` — machine-readable results
+
+## Test run video
+
+The recording below was made during a live run of `fiori_user_maintenance_app.robot` against the
+test system and shows the whole journey: logon, the **Home - Show All My Apps** view, the
+**User Maintenance** app in a new tab, filling the user name and searching in its input help (with
+the result list), closing the app tab, and the sign out back to the logon page.
+
+[![Test run video preview](docs/video/test-run-preview.gif)](docs/video/test-run.mp4)
+
+*The animated GIF is a 2× speed preview. Click it to open the full, real-time recording:
+[`docs/video/test-run.mp4`](docs/video/test-run.mp4) (16 seconds).*
+
+To record a run yourself, set `ROBOT_VIDEO_DIR` to an existing directory. The Browser library then
+records one video per page — the launchpad page and every app tab separately:
+
+```bash
+ROBOT_VIDEO_DIR=/tmp/fiori-video robot --outputdir results tests/
+```
+
+The videos are finalized when the browser closes. The example video uses the launchpad recording
+up to the moment the app opens, then the full app tab recording, then again the launchpad recording
+from the point where the app tab is closed through the sign out, because the Browser library records
+one video per page.
 
 ## Troubleshooting
 

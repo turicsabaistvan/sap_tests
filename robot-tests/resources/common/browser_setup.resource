@@ -11,9 +11,12 @@ Open Browser To Fiori Url
     [Arguments]    ${url}=${BASE_URL}
     Validate Configuration
     New Browser    ${BROWSER_TYPE}    headless=${HEADLESS_MODE}
+    ${record_size}=    Evaluate    {'width': $VIEWPORT_WIDTH, 'height': $VIEWPORT_HEIGHT}
+    ${video}=    Evaluate    {'dir': $VIDEO_RECORDING_DIR, 'size': $record_size} if $VIDEO_RECORDING_DIR else None
     New Context
     ...    viewport={'width': ${VIEWPORT_WIDTH}, 'height': ${VIEWPORT_HEIGHT}}
     ...    locale=${BROWSER_LOCALE}
+    ...    recordVideo=${video}
     New Page    ${url}
 
 Close Browser Session

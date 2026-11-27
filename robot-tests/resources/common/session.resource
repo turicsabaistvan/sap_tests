@@ -21,3 +21,8 @@ Open Browser And Log In To Fiori
     [Documentation]    Opens BASE_URL in a fresh browser context and signs in to the launchpad.
     Open Browser To Fiori Url
     Log In To Fiori Launchpad
+
+Log Out From Fiori Launchpad
+    [Documentation]    Signs out from the launchpad and waits until the logon page is displayed again.
+    Log Out From Launchpad
+    Assert Logon Page Is Displayed
