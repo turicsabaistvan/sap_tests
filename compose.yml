@@ -55,6 +55,8 @@ services:
       - FIORI_TEST_BROWSER=${BROWSER:-}
       - FIORI_TEST_HEADLESS=${HEADLESS:-}
       - FIORI_TEST_LANGUAGE=${FIORI_LANGUAGE:-}
+      - VM_IP=${VM_IP}
+      - VM_REPO=${VM_REPO}
     depends_on:
       dind:
         condition: service_healthy

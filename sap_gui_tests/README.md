@@ -59,7 +59,7 @@ resource shares the same session.
 ## Repository layout
 
 ```
-sap_gui_tests/
+sap_tests/
 ├─ tests/
 │  └─ 01_se16n_read_master_data.robot
 ├─ resources/
@@ -146,7 +146,7 @@ The automation user must be able to:
 ### Python environment
 
 ```powershell
-cd C:\Users\<you>\Documents\sap_gui_tests
+cd C:\Users\<you>\Documents\sap_tests
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
