@@ -65,3 +65,20 @@ Confirm Sign Out If Requested
     ${confirm_visible}=    Run Keyword And Return Status
     ...    Wait For Elements State    ${SIGN_OUT_CONFIRM_BUTTON}    visible    timeout=5s
     IF    ${confirm_visible}    Click    ${SIGN_OUT_CONFIRM_BUTTON}
+
+Assert Launchpad Home Page Is Intact
+    [Documentation]    Asserts the configured URL targets the expected client and the loaded home page
+    ...    shows no error dialog and was not reached through a redirect.
+    [Arguments]    ${expected_client}
+    Wait For Elements State    ${LAUNCHPAD_DASHBOARD_GROUPS}    visible    timeout=${LAUNCHPAD_TIMEOUT}
+    ${error_count}=    Get Element Count    ${LAUNCHPAD_MESSAGE_BOX}
+    Should Be Equal As Integers    ${error_count}    0    The launchpad home page shows an error dialog.
+    # SAP stores the client in the session after logon, so the loaded URL no longer carries it.
+    Should Contain    ${BASE_URL}    sap-client=${expected_client}
+    ...    The configured BASE_URL does not target client ${expected_client}.
+    ${current}=    Get Url
+    ${base_path}=    Evaluate    $BASE_URL.split('#')[0].split('?')[0]
+    ${current_path}=    Evaluate    $current.split('#')[0].split('?')[0]
+    Should Be Equal    ${current_path}    ${base_path}
+    ...    The launchpad navigated away from the configured URL (current url: ${current}).
+    Should Contain    ${current}    \#Shell-home    The launchpad did not return to the home page.

@@ -1,8 +1,13 @@
 # Robot Framework Fiori Login/Logout Tests
 
-This suite contains a single smoke test for the SAP Fiori launchpad: it opens the configured `BASE_URL`, sets the language on the logon page, signs in with the configured credentials and signs out again. It does not change any business data.
+This suite contains two Fiori launchpad tests:
 
-The suite uses Robot Framework with the Browser library (Playwright).
+- `fiori_login_logout.robot` opens the configured `BASE_URL`, sets the language on the logon page, signs in with the configured credentials and signs out again.
+- `fiori_user_maintenance_app.robot` opens the User Maintenance app from the launchpad All My Apps view in a new tab, checks the user name input help, then closes the tab again.
+
+Login is a precondition in both suites. Neither test changes business data: the app test only searches in an input help and cancels the dialogs.
+
+The suites use Robot Framework with the Browser library (Playwright).
 
 ## Requirements
 
@@ -64,6 +69,20 @@ robot --dryrun tests/
 ```
 
 Dry-run also resolves the environment, so the mandatory variables must be available (from `.env` or the shell) for this check to succeed.
+
+## App launch suite
+
+`tests/fiori/fiori_user_maintenance_app.robot` has one test: it opens the launchpad home page, opens the **Home - Show All My Apps** view, selects the `Z_TEST_CAT` catalog, starts the **User Maintenance** app in a new tab, fills the *User Name in User Master* field with the configured Fiori user, searches in the field's input help and cancels the dialogs, then closes the tab and verifies that the launchpad home page is back on the configured client without an error dialog or redirect.
+
+| Variable | Default | Description |
+|---|---|---|
+| `${APP_CATALOG}` | `Z_TEST_CAT` | Catalog in the All My Apps data source list that contains the app. |
+| `${APP_NAME}` | `User Maintenance` | App title clicked in the All My Apps view. |
+| `${EXPECTED_CLIENT}` | `800` | SAP client that must remain in the home page URL after the app is closed. |
+
+The user name comes from `FIORI_USERNAME` (`${USERNAME}`); no user name is hardcoded. Override the test data from the command line with `--variable APP_CATALOG:"<catalog>"` or `--variable APP_NAME:"<app>"`. If the test fails, its teardown takes a full-page screenshot.
+
+All locators are kept in `resources/selectors/`. The launchpad and app markup is release-specific: if the target system uses another UI5 release, adjust `all_my_apps_selectors.resource`, `user_maintenance_selectors.resource` and `launchpad_page_selectors.resource`.
 
 Run the static analysis (Robocop 9 uses the `check` subcommand):
 

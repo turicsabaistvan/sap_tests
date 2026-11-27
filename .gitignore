@@ -9,6 +9,7 @@ jenkins_home/
 # Logs
 *.log
 logs/
+playwright-log.txt
 
 # Dependencies
 **/node_modules/
